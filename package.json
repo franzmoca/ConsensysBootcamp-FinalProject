@@ -1,0 +1,23 @@
+{
+  "name": "ConsensysBootcamp-FinalProject",
+  "version": "1.0.0",
+  "description": "A petition website on the Ethereum blockchain!",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tsuru-/ConsensysBootcamp-FinalProject.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tsuru-/ConsensysBootcamp-FinalProject/issues"
+  },
+  "homepage": "https://github.com/tsuru-/ConsensysBootcamp-FinalProject#readme",
+  "dependencies": {
+    "openzeppelin-solidity": "^2.3.0"
+  }
+}
