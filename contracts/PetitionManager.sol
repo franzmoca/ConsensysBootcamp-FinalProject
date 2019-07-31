@@ -21,6 +21,7 @@ contract PetitionManager is Ownable, Pausable {
         address creator;
         uint totalSigns;
         uint targetSigns;
+        mapping(uint => address) signersId;
         mapping(address => bool) signers;
         bool isOpen;
     }
@@ -36,7 +37,7 @@ contract PetitionManager is Ownable, Pausable {
 
     event LogUserCreated(address indexed userAddress, string name);
     event LogPetitionCreated(address indexed creator, uint petitionId);
-    event LogPetitionSigned(address indexed signer, uint petitionId);
+    event LogPetitionSigned(address indexed signer, uint petitionId, uint totalSigns);
     event LogPetitionClosed(uint petitionId);
 
     modifier notUser(){
@@ -51,6 +52,16 @@ contract PetitionManager is Ownable, Pausable {
         _;
     }
 
+    modifier isCreator(uint _petitionId){
+        require(petitions[_petitionId].creator == msg.sender, "Only the creator of the petition can do this");
+        _;
+    }
+
+    modifier petitionExists(uint _petitionId){
+        require(petitions[_petitionId].creator != address(0), "Requested petition does not exist!");
+        _;
+    }
+
     function createUser(string memory _name, string memory _ens, string memory _ipfs_avatar)
     public notUser returns(bool) {
         require(bytes(_name).length > 0, "Name cannot be null");
@@ -59,7 +70,28 @@ contract PetitionManager is Ownable, Pausable {
         return true;
     }
 
-    //TODO: readPetition e readUser
+    function readPetition(uint petitionId)
+    public view petitionExists(petitionId) returns(string memory name, string memory description, string memory link,
+     string memory ipfs_banner, address creator, uint  targetSigns, uint totalSigns, bool isOpen) {
+        Petition storage p = petitions[petitionId];
+        name = p.name;
+        description = p.description;
+        link = p.link;
+        ipfs_banner = p.ipfs_banner;
+        creator = p.creator;
+        targetSigns = p.targetSigns;
+        totalSigns = p.totalSigns;
+        isOpen = p.isOpen;
+     }
+
+    function readUser(address userAddress)
+    public view returns(string memory name, string memory ens, string memory ipfs_avatar){
+        User storage u = users[userAddress];
+        name = u.name;
+        ens = u.ens;
+        ipfs_avatar = u.ipfs_avatar;
+    }
+
     function createPetition(string memory _name, string memory _description, string memory _link,
      string memory _ipfs_banner, uint  _targetSigns )
     public isUser returns(uint)
@@ -77,5 +109,44 @@ contract PetitionManager is Ownable, Pausable {
         emit LogPetitionCreated(msg.sender,petitionId);
         return petitionId;
     }
+
+    function signPetition(uint petitionId)
+    public isUser petitionExists(petitionId) returns(bool)
+    {
+        Petition storage p = petitions[petitionId];
+        require(!p.signers[msg.sender], "You already signed the petition!");
+        require(p.isOpen, "The petition was closed.");
+        p.signersId[p.totalSigns] = msg.sender;
+        p.signers[msg.sender] = true;
+        p.totalSigns++;
+        //Do something if targetSigns are reached?!
+        emit LogPetitionSigned(msg.sender,petitionId,p.totalSigns);
+        return true;
+    }
+
+    function closePetition(uint petitionId)
+    public petitionExists(petitionId) isCreator(petitionId) returns(bool)
+    {
+        petitions[petitionId].isOpen = false;
+        return true;
+    }
+
+    function getSignaturesFromRange(uint start, uint end, uint petitionId)
+    public view petitionExists(petitionId) isUser returns(address[] memory){
+        require(start < end, "Start of range must be smaller than end");
+        require(end<=petitions[petitionId].totalSigns,"End of range is too big");
+        address[] memory signArray;
+        Petition storage p = petitions[petitionId];
+        uint j = 0;
+        for(uint i = start; i<=end;i++){
+            address signer = p.signersId[i];
+            if(p.signers[signer]){
+                signArray[j] = signer;
+                j++;
+            }
+        }
+        return signArray;
+    }
+
 
 }

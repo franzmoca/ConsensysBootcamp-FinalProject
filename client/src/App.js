@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import PetitionManager from "./contracts/PetitionManager.json";
 import getWeb3 from "./utils/getWeb3";
+import Button from '@material-ui/core/Button';
 
 import "./App.css";
 
@@ -52,7 +53,9 @@ class App extends Component {
     return (
       <div className="App">
         <h1>There are {this.state.petitionNumber} active petitions right now!</h1>
-
+        <Button variant="contained" color="primary">
+           Hello World
+        </Button>
       </div>
     );
   }
