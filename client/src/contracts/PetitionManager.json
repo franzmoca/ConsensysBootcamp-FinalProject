@@ -14601,10 +14601,16 @@
       "links": {},
       "address": "0x53a9998851cFA4b49C3C6a1cD65AbbEDB862d9Ca",
       "transactionHash": "0x125583405dd5f822f7d90643c780326cd139b74a03483ca9e6d84bd3606cb9a2"
+    },
+    "1564573939972": {
+      "events": {},
+      "links": {},
+      "address": "0x83402A393A92c713290ff555f2De1eF6127A6c69",
+      "transactionHash": "0x9a2f9d8af315aff8fd907f234cb575a4bede0a5fe0ebc9e14def28401e478932"
     }
   },
   "schemaVersion": "3.0.10",
-  "updatedAt": "2019-07-31T08:21:16.529Z",
+  "updatedAt": "2019-07-31T11:52:39.329Z",
   "devdoc": {
     "methods": {
       "isOwner()": {
