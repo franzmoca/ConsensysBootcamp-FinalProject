@@ -3,6 +3,9 @@ pragma solidity ^0.5.0;
 import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import 'openzeppelin-solidity/contracts/lifecycle/Pausable.sol';
 
+/// @title PetitionManager
+/// @notice Decentralized petition system
+/// @author Francesco Moca 2019
 contract PetitionManager is Ownable, Pausable {
 
     /*
@@ -32,7 +35,9 @@ contract PetitionManager is Ownable, Pausable {
         string ipfs_avatar;
     }
 
+    /// @notice each petition has one unique uint as key
     mapping (uint => Petition) public petitions;
+    /// @notice unregistered users can be recognized by empty name
     mapping (address => User) public users;
 
     event LogUserCreated(address indexed userAddress, string name);
@@ -40,62 +45,61 @@ contract PetitionManager is Ownable, Pausable {
     event LogPetitionSigned(address indexed signer, uint petitionId, uint totalSigns);
     event LogPetitionClosed(uint petitionId);
 
+    /// @dev check if the user never registered
     modifier notUser(){
         //Best way to check if a string is uninitialized
         require(bytes(users[msg.sender].name).length == 0, "You are already registered");
         _;
     }
 
+    /// @dev check if an user is registered by his name. The name is the only obligatory field of an user (for now)
     modifier isUser(){
         //Best way to check if a string is uninitialized
         require(bytes(users[msg.sender].name).length > 0, "You need to register first.");
         _;
     }
 
+    /// @dev check if the sender created the petition he want to act on
     modifier isCreator(uint _petitionId){
         require(petitions[_petitionId].creator == msg.sender, "Only the creator of the petition can do this");
         _;
     }
 
+    /// @dev every existing petition has an associated creator address
     modifier petitionExists(uint _petitionId){
         require(petitions[_petitionId].creator != address(0), "Requested petition does not exist!");
         _;
     }
 
+    /// @notice Create an user giving a name and eventually an ens and an ipfs hash rapresenting an image
+    /// @dev Cannot be run if already an user or if the contract is paused!
+    /// @param _name must not be null
+    /// @param _ens (crosschecking the validity of an ens in solidity is expensive, it's easier doing it client side)
+    /// @param _ipfs_avatar if the ipfs hash given is empty or not valid, a placeholder is shown clientside
+    /// @return boolean for success
     function createUser(string memory _name, string memory _ens, string memory _ipfs_avatar)
-    public notUser returns(bool) {
+    public notUser whenNotPaused returns(bool) {
         require(bytes(_name).length > 0, "Name cannot be null");
         users[msg.sender] = User({name: _name, ens: _ens, ipfs_avatar:_ipfs_avatar});
         emit LogUserCreated(msg.sender,_name);
         return true;
     }
 
-    function readPetition(uint petitionId)
-    public view petitionExists(petitionId) returns(string memory name, string memory description, string memory link,
-     string memory ipfs_banner, address creator, uint  targetSigns, uint totalSigns, bool isOpen) {
-        Petition storage p = petitions[petitionId];
-        name = p.name;
-        description = p.description;
-        link = p.link;
-        ipfs_banner = p.ipfs_banner;
-        creator = p.creator;
-        targetSigns = p.targetSigns;
-        totalSigns = p.totalSigns;
-        isOpen = p.isOpen;
-     }
-
-    function readUser(address userAddress)
-    public view returns(string memory name, string memory ens, string memory ipfs_avatar){
-        User storage u = users[userAddress];
-        name = u.name;
-        ens = u.ens;
-        ipfs_avatar = u.ipfs_avatar;
-    }
-
+    /// @notice Create a Petition
+    /// @dev Cannot be run if not an user or if the contract is paused!
+    /// @param _name  Name is not unique cannot be used as key
+    /// @param _description A longer description means a more expensive petition deploy, in future it should be limited.
+    /// @param _link Useful resource for additional informations
+    /// @param _ipfs_banner if the ipfs hash given is empty or not valid, a placeholder is shown clientside
+    /// @param _targetSigns for now this value is just cosmetic, it could be used to close a petition automatically, or for other triggers
+    /// @return petition unique id (uint)
     function createPetition(string memory _name, string memory _description, string memory _link,
      string memory _ipfs_banner, uint  _targetSigns )
-    public isUser returns(uint)
+    public isUser whenNotPaused returns(uint)
     {
+        require(bytes(_name).length > 0, "Name cannot be null");
+        require(_targetSigns > 0, "The target signatures must be positive");
+
         uint petitionId = idGenerator;
         Petition storage p = petitions[petitionId];
         p.name = _name;
@@ -110,8 +114,12 @@ contract PetitionManager is Ownable, Pausable {
         return petitionId;
     }
 
+    /// @notice Sign a petition, registering your data ad increasing the sign count
+    /// @dev Cannot be run if not an user, if the contract is paused, if you already signed, if the petition doesn't exist or is closed!
+    /// @param petitionId 
+    /// @return boolean for success
     function signPetition(uint petitionId)
-    public isUser petitionExists(petitionId) returns(bool)
+    public isUser whenNotPaused petitionExists(petitionId) returns(bool)
     {
         Petition storage p = petitions[petitionId];
         require(!p.signers[msg.sender], "You already signed the petition!");
@@ -124,6 +132,10 @@ contract PetitionManager is Ownable, Pausable {
         return true;
     }
 
+    /// @notice Close the petition not allowing more users to sign it
+    /// @dev The petition should ofcourse exist and only the creator can call this method.
+    /// @param petitionId
+    /// @return boolean for success
     function closePetition(uint petitionId)
     public petitionExists(petitionId) isCreator(petitionId) returns(bool)
     {
@@ -131,23 +143,11 @@ contract PetitionManager is Ownable, Pausable {
         return true;
     }
 
-    function getSignaturesFromRange(uint start, uint end, uint petitionId)
-    public view petitionExists(petitionId) isUser returns(address[] memory){
-        require(start < end, "Start of range must be smaller than end");
-        require(end<=petitions[petitionId].totalSigns,"End of range is too big");
-        address[] memory signArray;
-        Petition storage p = petitions[petitionId];
-        uint j = 0;
-        for(uint i = start; i<=end;i++){
-            address signer = p.signersId[i];
-            if(p.signers[signer]){
-                signArray[j] = signer;
-                j++;
-            }
-        }
-        return signArray;
-    }
-
+    /// @notice Obtain the information about a single signature.
+    /// @dev The conditional if is present to allow in the future an user to withdrawn his signature. (Not implemented right now)
+    /// @param index The index parameters should be smaller than the total signatures of the petition!
+    /// @param petitionId the petition existance is checked with the corresponding modifier
+    /// @return name, ens, ipfs_avatar (User struct decomposed for solidity limitations) and signing address
     function getSignaturesFromIndex(uint index, uint petitionId)
     public view petitionExists(petitionId) isUser returns(string memory name, string memory ens, string memory ipfs_avatar, address  userAddress){
         require(index<=petitions[petitionId].totalSigns,"Requested index is outofbound ");
@@ -163,5 +163,7 @@ contract PetitionManager is Ownable, Pausable {
         userAddress = signer;
     }
 
+    /// @notice fallback function, not payable (there is now value exchanged in the contract ATM)
+    function() external { }
 
 }
