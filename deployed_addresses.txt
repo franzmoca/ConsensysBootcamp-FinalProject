@@ -1,0 +1,5 @@
+DEPLOYED CONTRACT : PetitionManager
+
+transaction hash:    0xe4b53547d8124ae20ffc31ac66382ac8aa6f7b67f7816303f20aceacab8da431
+contract address:    0x1Ef3e721092d4630f59E15Be0cBb0F2AbC077bD4
+account:             0x8e868a0901DF20ee5355253D34b8FbFF2C9D868E

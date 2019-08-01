@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/tsuru-/ConsensysBootcamp-FinalProject#readme",
   "dependencies": {
-    "openzeppelin-solidity": "^2.3.0"
+    "openzeppelin-solidity": "^2.3.0",
+    "truffle-hdwallet-provider": "^1.0.15"
   }
 }
