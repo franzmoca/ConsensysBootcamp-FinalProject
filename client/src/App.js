@@ -151,7 +151,7 @@ class App extends Component {
       <div className="App">
         <Address address={this.state.accounts[0]} identity={this.state.identity}/>
         {!this.state.isUser && <div> <h4>You are not registered to the service!</h4>
-        <RegisterForm handleRegistration={this.handleRegistration} myAddress={this.state.accounts[0]}/>
+        <RegisterForm handleRegistration={this.handleRegistration} myAddress={this.state.accounts[0]} web3={this.state.web3}/>
         </div>}
         {this.state.isUser && <div><CreatePetitionForm handleCreatePetition={this.handleCreatePetition}/></div>}
          {(this.state.petitionNumber > 0 && this.state.isUser) && <div> <PetitionGrid petitionData={this.state.petitions} 

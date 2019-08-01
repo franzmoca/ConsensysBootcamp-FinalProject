@@ -12572,10 +12572,16 @@
       "links": {},
       "address": "0xbE58a6BF46997D0491c5d99104c8795AD265B197",
       "transactionHash": "0xd99331d677eecc58dd64391a73bc9e0cf342e81f3aa012eaf3ec9b225b77e8d3"
+    },
+    "1564655484469": {
+      "events": {},
+      "links": {},
+      "address": "0x6de33B074824a3D45d03c1F509568FbF7FF0a244",
+      "transactionHash": "0x46ce145e0b93199b4de1086721dcc208e907d89ee282c1108ae7f94c82c1ef0a"
     }
   },
   "schemaVersion": "3.0.10",
-  "updatedAt": "2019-08-01T09:54:16.629Z",
+  "updatedAt": "2019-08-01T10:37:05.948Z",
   "devdoc": {
     "author": "Francesco Moca 2019",
     "methods": {

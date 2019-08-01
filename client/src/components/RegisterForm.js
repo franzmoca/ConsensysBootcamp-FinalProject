@@ -9,7 +9,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 
 export default function RegisterForm(props) {
   const [open, setOpen] = React.useState(false);
-  const [myAddess,setAddress] = React.useState(props.myAddess)
+  const [myAddress] = React.useState(props.myAddress)
 
   function handleClickOpen() {
     setOpen(true);
@@ -24,14 +24,15 @@ export default function RegisterForm(props) {
     const name = e.target.elements.name.value;
     let ens = e.target.elements.ens.value
     const ipfs = e.target.elements.ipfs.value
-
-    web3.eth.ens.getAddress('ethereum.eth').then(function (address) {
-      if(address !== myAddess){
+    if(ens.length > 0){
+    props.web3.eth.ens.getAddress('ethereum.eth').then(function (address) {
+      if(address !== myAddress){
         ens = "";
         alert("ENS specified is not correct!")
         return;
       }
     })
+  }
     props.handleRegistration(name,ens,ipfs)
 
     handleClose()
