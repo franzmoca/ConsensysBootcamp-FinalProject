@@ -6,16 +6,18 @@ import CreatePetitionForm from './components/CreatePetitionForm'
 import PetitionNumber from './components/PetitionNumber'
 import PetitionGrid from './components/PetitionGrid'
 import Address from './components/Address'
-
-
 import "./App.css";
 
 class App extends Component {
-  state = { petitionNumber: -1, web3: null, accounts: null, contract: null, 
-    isUser: false, identity: {name:"",ens:"",ipfs:""}, petitions:[] };
- 
+  state = { petitionNumber: -1,
+          web3: null,     
+          accounts: null,
+          contract: null,
+          isUser: false,
+          identity: {name:"",ens:"",ipfs:""},
+          petitions:[] };
 
-  componentDidMount = async () => {
+    componentDidMount = async () => {
     try {
       // Get network provider and web3 instance.
       const web3 = await getWeb3();
@@ -41,7 +43,11 @@ class App extends Component {
       );
       console.error(error);
     }
+    /*this.initIPFS()
+    const placeholder = await this.loadImageIpfs("QmcZ7ZRbof1NEqch8cJ6qnDtA8CTuMdStN5kqhTv9hvhfq")*/
   };
+
+
 
   setIdentity = (name,ens,ipfs_avatar) =>{
     this.setState({isUser:true, identity:{name,ens,ipfs_avatar} })
@@ -57,6 +63,8 @@ class App extends Component {
 
     for(let i = oldPetitionNumber; i<newPetitionNumber; i++){
       const petitionData = await contract.methods.petitions(i).call();
+      const creatorData = await contract.methods.users(petitionData.creator).call();
+      petitionData.identity = creatorData;
       newPetitions.push(petitionData);
     }
 
@@ -64,7 +72,32 @@ class App extends Component {
     this.setState(prevState => ({
       petitions: [...prevState.petitions, ...newPetitions]
     }))
+  }
 
+  fetchSignatures = async (petitionIndex,totalSignatures) => {
+    const { accounts, contract } = this.state;
+    const signatures = []
+    for(let i = 0 ; i < totalSignatures ; i++){
+      const signature = await contract.methods.getSignaturesFromIndex(i, petitionIndex).call();
+
+      if(signature.name !== ""){
+        signatures.push(signature);
+      }
+    }
+    return signatures;
+  }
+
+  fetchPetition = async (petitionIndex) =>{
+    const { accounts, contract } = this.state;
+    // if petitionNumber is set to initial value -1, we fetch all the petitions
+    const petitionData = await contract.methods.petitions(petitionIndex).call();
+    const creatorData = await contract.methods.users(petitionData.creator).call();
+    petitionData.identity = creatorData;
+
+    this.setState(prevState => ({
+    petitions: [
+      ...prevState.petitions.slice(0,petitionIndex), petitionData, ...prevState.petitions.slice(petitionIndex+1)]
+    }))
   }
 
   checkUser = async () =>{
@@ -72,7 +105,7 @@ class App extends Component {
     const isUserResponse = await contract.methods.users(accounts[0]).call();
     console.log(isUserResponse);
     if(isUserResponse.name !== ""){
-      this.setIdentity(isUserResponse.name, isUserResponse.ens, isUserResponse.ipfs);
+      this.setIdentity(isUserResponse.name, isUserResponse.ens, isUserResponse.ipfs_avatar);
     }
   }
 
@@ -100,6 +133,15 @@ class App extends Component {
       this.fetchPetitions()
     }
   }
+
+  handleSignPetition = async (petitionIndex) =>{
+    const { accounts, contract } = this.state;
+    const petitionSignResponse = await contract.methods.signPetition(petitionIndex).send({from:accounts[0]})
+    if(petitionSignResponse){
+      this.fetchPetition(petitionIndex)
+    }
+
+  } 
   
 
   render() {
@@ -108,13 +150,14 @@ class App extends Component {
     }
     return (
       <div className="App">
-        <PetitionNumber count={this.state.petitionNumber} />
         <Address address={this.state.accounts[0]} identity={this.state.identity}/>
         {!this.state.isUser && <div> <h4>You are not registered to the service!</h4>
         <RegisterForm handleRegistration={this.handleRegistration}/>
         </div>}
         {this.state.isUser && <div><CreatePetitionForm handleCreatePetition={this.handleCreatePetition}/></div>}
-         {this.state.petitionNumber > 0 && <div> <PetitionGrid petitionData={this.state.petitions} /> </div>} 
+         {(this.state.petitionNumber > 0 && this.state.isUser) && <div> <PetitionGrid petitionData={this.state.petitions} 
+          handleSignPetition={this.handleSignPetition} fetchSignatures={this.fetchSignatures} myAddress={this.state.accounts[0]} /> </div>} 
+        <PetitionNumber count={this.state.petitionNumber} />
       </div>
     );
   }

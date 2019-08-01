@@ -6,7 +6,6 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import TextareaAutosize from '@material-ui/core/TextareaAutosize';
 
 export default function CreatePetitionForm(props) {
   const [open, setOpen] = React.useState(false);
@@ -25,11 +24,11 @@ export default function CreatePetitionForm(props) {
     const name = e.target.elements.name.value;
     const description = e.target.elements.description.value;
     const link = e.target.elements.link.value;
-    //const ipfs = e.target.elements.ens.ipfs.value;
+    const ipfs = e.target.elements.ipfs.value;
     const target = e.target.elements.target.value;
 
 
-    props.handleCreatePetition(name,description,link,"",target)
+    props.handleCreatePetition(name,description,link,ipfs,target)
     //TODO VERIFY
 
     handleClose()
@@ -71,6 +70,15 @@ export default function CreatePetitionForm(props) {
             name="link"
             fullWidth
           />
+
+          <TextField
+            margin="dense"
+            id="ipfs"
+            label="Insert an ipfs hash of an image for a custom banner!"
+            name="ipfs"
+            fullWidth
+          />
+
 
           <TextField
             required

@@ -22,8 +22,10 @@ export default function RegisterForm(props) {
     e.preventDefault()
     const name = e.target.elements.name.value;
     const ens = e.target.elements.ens.value
+    const ipfs = e.target.elements.ipfs.value
+
     //TODO ENS VERIFY
-    props.handleRegistration(name,ens,"")
+    props.handleRegistration(name,ens,ipfs)
 
     handleClose()
   }
@@ -53,6 +55,13 @@ export default function RegisterForm(props) {
             id="ens"
             label="ENS address"
             name="ens"
+            fullWidth
+          />
+          <TextField
+            margin="dense"
+            id="ipfs"
+            label="Insert ipfs hash of an image for a custom avatar"
+            name="ipfs"
             fullWidth
           />
           <DialogContentText>

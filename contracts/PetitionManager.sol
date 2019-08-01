@@ -148,5 +148,20 @@ contract PetitionManager is Ownable, Pausable {
         return signArray;
     }
 
+    function getSignaturesFromIndex(uint index, uint petitionId)
+    public view petitionExists(petitionId) isUser returns(string memory name, string memory ens, string memory ipfs_avatar, address  userAddress){
+        require(index<=petitions[petitionId].totalSigns,"Requested index is outofbound ");
+        User memory sign;
+        Petition storage p = petitions[petitionId];
+        address signer = p.signersId[index];
+        if(p.signers[signer]){
+            sign = users[signer];
+        }
+        name = sign.name;
+        ens = sign.ens;
+        ipfs_avatar = sign.ipfs_avatar;
+        userAddress = signer;
+    }
+
 
 }
