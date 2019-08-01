@@ -1,4 +1,4 @@
-DEPLOYED CONTRACT : PetitionManager
+DEPLOYED CONTRACT on Rinkeby : PetitionManager
 
 transaction hash:    0xe4b53547d8124ae20ffc31ac66382ac8aa6f7b67f7816303f20aceacab8da431
 contract address:    0x1Ef3e721092d4630f59E15Be0cBb0F2AbC077bD4

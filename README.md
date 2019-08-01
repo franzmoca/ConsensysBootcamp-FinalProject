@@ -35,10 +35,15 @@ I attempted to create an IPFS node runtime for downloading the images, but it sl
 
 At the end I decided to use a gateway for the image loading (ipfs.io) for a way better performance.
 
-I didn't attempt to offer uploading functionality to the user because I don't believe it's useful without the file pinning part.
+I didn't attempt to offer uploading functionality to the user because I didn't believe it's useful for this dApp without the file pinning part.
 
+## ENS
 
-## Installation and local testing
+One of the attributes that can be used to identify a single user is the **ENS** (Ethereum Name Service) that can be used for better recognize a person. 
+When an user registers there is the possibility to specify its own ENS that is compared with the Metamask address using Web3 in a clientside check.
+I didn't find a convenient way to crosscheck on-chain inside the smartcontract, but for sure it could be a nice addition to the project.
+
+## Installation and testing
 
 Make sure you have truffle and ganache-cli installed.
 
@@ -53,6 +58,8 @@ Make sure you have truffle and ganache-cli installed.
 8. Follow the demo in the video attached to see the main featurer of the dApp.
 
 
+## Testnet
 
+The smartcontract is deployed also on Ethereum Rinkeby Testnet, see "deployed_addresses.txt" for details.
 
 
