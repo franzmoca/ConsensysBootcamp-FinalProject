@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import Button from '@material-ui/core/Button';
 import { makeStyles } from '@material-ui/core/styles';
 import Dialog from '@material-ui/core/Dialog';
@@ -35,13 +35,13 @@ export default function PetitionDialog(props) {
     setOpen(true);
   }
 
+  //Use Effects are used to load the signatures into each PetitionDialog, and to prevent douple signing.
   useEffect(() => {
     async function fetchData() {
     const signatures = await props.fetchSignatures(props.index, p.totalSigns)
     setArray([...signatures])
-    console.log(array)
+
     const searchIndex = array.findIndex(x => x.userAddress === props.myAddress)
-    console.log(searchIndex)
     if(searchIndex === -1){
       setDisabled(false)
     }else{
@@ -53,9 +53,8 @@ export default function PetitionDialog(props) {
 
   useEffect(() => {
     async function checkSignatures() {
-    const searchIndex = array.findIndex(x => x.userAddress === props.myAddress)
-    console.log(searchIndex)
-    if(searchIndex === -1){
+    const searchIndex_1 = array.findIndex(x => x.userAddress === props.myAddress)
+    if(searchIndex_1 === -1){
       setDisabled(false)
     }else{
       setDisabled(true)
@@ -87,20 +86,21 @@ export default function PetitionDialog(props) {
      open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
         <DialogTitle id="form-dialog-title">Sign Petition!</DialogTitle>
         <DialogContent className={classes.center}>
-            <img className={classes.imgSize} src={p.ipfs_banner === "" ? "https://ipfs.io/ipfs/QmcZ7ZRbof1NEqch8cJ6qnDtA8CTuMdStN5kqhTv9hvhfq" : "https://ipfs.io/ipfs/"+ p.ipfs_banner } alt={p.name} />
+            <img className={classes.imgSize} src={"https://ipfs.io/ipfs/"+ p.ipfs_banner }  onError={(e)=>{e.target.onerror = null; e.target.src="https://ipfs.io/ipfs/QmcZ7ZRbof1NEqch8cJ6qnDtA8CTuMdStN5kqhTv9hvhfq"} }alt={p.name} />
             <h1 > {p.name} </h1>
             Proposed by
             <Address address={p.creator} identity={p.identity}/>
 
             <h3 > {p.totalSigns} / {p.targetSigns} subscriptions so far! </h3>
             
-            <h4 > Description: {p.description} </h4>
+            <h4 > Description: </h4> {p.description} 
+            <h4> Urls: </h4> <a href={p.link}>{p.link}</a>
 
-            Submitting this form will trigger a transaction to sign the petition!
+            <h5>Submitting this form will trigger a transaction to sign the petition!</h5>
 
             <h2> Signatures: </h2>
-            { array.map( address =>(
-            <Address key={address.userAddress} identity = {{name: address.name, ens: address.ens, ipfs_avatar: address.ipfs_avatar}} address={address.userAddress} />
+            { array.map( (addr,idx) =>(
+            <Address key={idx} identity = {{name: addr.name, ens: addr.ens, ipfs_avatar: addr.ipfs_avatar}} address={addr.userAddress} />
 
           )) }
             

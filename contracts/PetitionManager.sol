@@ -116,7 +116,7 @@ contract PetitionManager is Ownable, Pausable {
 
     /// @notice Sign a petition, registering your data ad increasing the sign count
     /// @dev Cannot be run if not an user, if the contract is paused, if you already signed, if the petition doesn't exist or is closed!
-    /// @param petitionId 
+    /// @param petitionId ...
     /// @return boolean for success
     function signPetition(uint petitionId)
     public isUser whenNotPaused petitionExists(petitionId) returns(bool)
@@ -134,7 +134,7 @@ contract PetitionManager is Ownable, Pausable {
 
     /// @notice Close the petition not allowing more users to sign it
     /// @dev The petition should ofcourse exist and only the creator can call this method.
-    /// @param petitionId
+    /// @param petitionId ...
     /// @return boolean for success
     function closePetition(uint petitionId)
     public petitionExists(petitionId) isCreator(petitionId) returns(bool)

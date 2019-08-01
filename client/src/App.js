@@ -43,8 +43,6 @@ class App extends Component {
       );
       console.error(error);
     }
-    /*this.initIPFS()
-    const placeholder = await this.loadImageIpfs("QmcZ7ZRbof1NEqch8cJ6qnDtA8CTuMdStN5kqhTv9hvhfq")*/
   };
 
 
@@ -54,13 +52,14 @@ class App extends Component {
   }
 
   fetchPetitions = async () =>{
-    const { accounts, contract } = this.state;
+    const contract  = this.state.contract;
     // if petitionNumber is set to initial value -1, we fetch all the petitions
     const oldPetitionNumber = this.state.petitionNumber=== -1 ? 0 : this.state.petitionNumber;
     const newPetitionNumber = await contract.methods.idGenerator().call();
     this.setState({ petitionNumber: newPetitionNumber });
     const newPetitions = [];
 
+    //Two calls for each petition to get also the creator data, signers fetch is done separately
     for(let i = oldPetitionNumber; i<newPetitionNumber; i++){
       const petitionData = await contract.methods.petitions(i).call();
       const creatorData = await contract.methods.users(petitionData.creator).call();
@@ -75,7 +74,7 @@ class App extends Component {
   }
 
   fetchSignatures = async (petitionIndex,totalSignatures) => {
-    const { accounts, contract } = this.state;
+    const contract  = this.state.contract;
     const signatures = []
     for(let i = 0 ; i < totalSignatures ; i++){
       const signature = await contract.methods.getSignaturesFromIndex(i, petitionIndex).call();
@@ -88,7 +87,7 @@ class App extends Component {
   }
 
   fetchPetition = async (petitionIndex) =>{
-    const { accounts, contract } = this.state;
+    const contract  = this.state.contract;
     // if petitionNumber is set to initial value -1, we fetch all the petitions
     const petitionData = await contract.methods.petitions(petitionIndex).call();
     const creatorData = await contract.methods.users(petitionData.creator).call();
